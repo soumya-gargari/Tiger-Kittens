@@ -1,0 +1,25 @@
+# github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5
+## explicit
+github.com/erikstmartin/go-testdb
+# github.com/go-sql-driver/mysql v1.7.1
+## explicit; go 1.13
+github.com/go-sql-driver/mysql
+# github.com/gorilla/mux v1.8.1
+## explicit; go 1.20
+github.com/gorilla/mux
+# github.com/kellydunn/golang-geo v0.7.0
+## explicit
+github.com/kellydunn/golang-geo
+# github.com/kylelemons/go-gypsy v1.0.0
+## explicit; go 1.5
+github.com/kylelemons/go-gypsy/yaml
+# github.com/lib/pq v1.10.9
+## explicit; go 1.13
+github.com/lib/pq
+github.com/lib/pq/oid
+github.com/lib/pq/scram
+# github.com/ziutek/mymysql v1.5.4
+## explicit
+github.com/ziutek/mymysql/godrv
+github.com/ziutek/mymysql/mysql
+github.com/ziutek/mymysql/native
