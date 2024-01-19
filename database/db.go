@@ -109,7 +109,7 @@ func (d *Database) CreateTigerInfoTable(tableName string) error {
 
 func (d *Database) CreateTigerSightingInfoTable(tableName string) error {
 	d.Db = d.InitDatabse()
-	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %v(name VARCHAR(255), latitude VARCHAR(255), longitude VARCHAR(255), timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, uploadImage BOOL)", tableName)
+	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %v(username VARCHAR(255), tigername VARCHAR(255), latitude VARCHAR(255), longitude VARCHAR(255), timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, uploadImage BOOL)", tableName)
 	fmt.Println("query statement for creation of table is:", query)
 	_, err := d.Db.Exec(query)
 	if err != nil {
@@ -138,19 +138,19 @@ func (d *Database) InsertTigerData(tableName string, tigerData data.TigerDetails
 }
 
 func (d *Database) InsertTigerSightingData(tableName string, tigerSightingData data.TigerSightingDetails) error {
-	exists, err := recordExists(d.Db, tableName, "name", tigerSightingData.Name)
+	// exists, err := recordExists(d.Db, tableName, "tigername", tigerSightingData.TigerName)
+	// if err != nil {
+	// 	return err
+	// }
+	// if exists {
+	// 	return errors.New("failed to insert data, duplicate")
+	// } else {
+	_, err := d.Db.Exec("INSERT INTO tigersighting (userName, tigerName, timestamp, latitude, longitude, uploadImage) VALUES (?, ?, ?, ?, ?, ?)", tigerSightingData.UserName, tigerSightingData.TigerName, tigerSightingData.TimeStamp, tigerSightingData.Latitude, tigerSightingData.Longitude, tigerSightingData.UploadImage)
 	if err != nil {
+		fmt.Println("failed to insert data", err)
 		return err
 	}
-	if exists {
-		return errors.New("failed to insert data, duplicate")
-	} else {
-		_, err = d.Db.Exec("INSERT INTO tigersighting (name, timestamp, latitude, longitude, uploadImage) VALUES (?, ?, ?, ?, ?)", tigerSightingData.Name, tigerSightingData.TimeStamp, tigerSightingData.Latitude, tigerSightingData.Longitude, tigerSightingData.UploadImage)
-		if err != nil {
-			fmt.Println("failed to insert data", err)
-			return err
-		}
-	}
+
 	return nil
 }
 
@@ -186,7 +186,7 @@ func (d *Database) GetAllTigerSightingData(tableName string) ([]data.TigerSighti
 	defer rows.Close()
 	for rows.Next() {
 		var tigerSightDetails data.TigerSightingDetails
-		err := rows.Scan(&tigerSightDetails.Name, &tigerSightDetails.Latitude, &tigerSightDetails.Longitude, &tigerSightDetails.TimeStamp, &tigerSightDetails.UploadImage)
+		err := rows.Scan(&tigerSightDetails.UserName, &tigerSightDetails.TigerName, &tigerSightDetails.Latitude, &tigerSightDetails.Longitude, &tigerSightDetails.TimeStamp, &tigerSightDetails.UploadImage)
 		if err != nil {
 			fmt.Println("failed to get data from mysql table", err)
 			return nil, err
@@ -223,4 +223,25 @@ func recordExists(db *sql.DB, tableName, columnName, value string) (bool, error)
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (d *Database) GetAllReportedUsers(tableName, tigerName string) ([]string, error) {
+	var usernames []string
+	query := fmt.Sprintf("SELECT username FROM %s where tigername='%s'", data.TigerSightingInfoTableName, tigerName)
+	rows, err := d.Db.Query(query)
+	if err != nil {
+		fmt.Println("failed to get data from mysql table", err)
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var username string
+		err := rows.Scan(&username)
+		if err != nil {
+			fmt.Println("failed to get data from mysql table", err)
+			return nil, err
+		}
+		usernames = append(usernames, username)
+	}
+	return usernames, nil
 }

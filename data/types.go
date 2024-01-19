@@ -30,7 +30,8 @@ type TigerDetails struct {
 }
 
 type TigerSightingDetails struct {
-	Name string `json:"name"`
+	UserName  string `json:"userName"`
+	TigerName string `json:"tigerName"`
 	// Pass the timestamp as ISO 8601 format in req body
 	// for ex: "timestamp": "2015-07-05T22:16:18Z"
 	TimeStamp   time.Time `json:"timestamp"`

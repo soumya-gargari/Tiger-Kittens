@@ -73,7 +73,7 @@ func CreateTigerSighting(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to create tigersighting table", http.StatusInternalServerError)
 		return
 	}
-	tigerData, err := dB.GetTigerData(data.TigerInfoTableName, tigerSightDetails.Name)
+	tigerData, err := dB.GetTigerData(data.TigerInfoTableName, tigerSightDetails.TigerName)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "failed to get tiger data from tigerdetails Table", http.StatusInternalServerError)
@@ -87,7 +87,7 @@ func CreateTigerSighting(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("latitude longitudes are:", lat1, lon1, lat2, lon2)
 		dist := distance.CalculateDistance(lat1, lon1, lat2, lon2)
 		if dist > 5 {
-			err = dB.InsertTigerSightingData(data.TigerInfoTableName, tigerSightDetails)
+			err = dB.InsertTigerSightingData(data.TigerSightingInfoTableName, tigerSightDetails)
 			if err != nil {
 				fmt.Println(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -99,7 +99,19 @@ func CreateTigerSighting(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-
+	//send a notification email to all the users that have reported a sighting of the same tiger
+	// TODO: put this messsage sending into other folder and create send aqnd consume methods
+	users, err := dB.GetAllReportedUsers(data.TigerSightingInfoTableName, tigerSightDetails.TigerName)
+	fmt.Println("all users are:", users)
+	messageQueue := make(chan string, 100)
+	for i := 0; i < len(users); i++ {
+		msg := users[i] + " ->message sent"
+		messageQueue <- msg
+	}
+	close(messageQueue)
+	for v := range messageQueue {
+		fmt.Println("messages are :", v)
+	}
 	json.NewEncoder(w).Encode(http.StatusCreated)
 }
 
