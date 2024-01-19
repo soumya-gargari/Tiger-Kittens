@@ -31,7 +31,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	err = dB.InsertUserData(data.UserTableName, userDetails)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "failed to save data to mysql Table", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	json.NewEncoder(w).Encode(http.StatusCreated)

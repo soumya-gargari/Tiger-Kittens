@@ -3,6 +3,7 @@ package database
 import (
 	"Tiger-Kittens/data"
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -55,12 +56,20 @@ func (d *Database) CreateUserTable(tableName string) error {
 }
 
 func (d *Database) InsertUserData(tableName string, userData data.UserDetails) error {
-	query := fmt.Sprintf("INSERT INTO %s VALUES('%s','%s','%s')", tableName, userData.UserName, userData.PassWord, userData.Email)
-	fmt.Println("query statement for insertion is:", query)
-	_, err := d.Db.Query(query)
+	exists, err := recordExists(d.Db, tableName, "username", userData.UserName)
 	if err != nil {
-		fmt.Println("failed to insert data", err)
 		return err
+	}
+	if exists {
+		return errors.New("failed to insert data, duplicate")
+	} else {
+		query := fmt.Sprintf("INSERT INTO %s VALUES('%s','%s','%s')", tableName, userData.UserName, userData.PassWord, userData.Email)
+		fmt.Println("query statement for insertion is:", query)
+		_, err := d.Db.Query(query)
+		if err != nil {
+			fmt.Println("failed to insert data", err)
+			return err
+		}
 	}
 	return nil
 }
@@ -76,7 +85,7 @@ func (d *Database) GetUserData(tableName, userName, passWord string) (data.UserD
 	}
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&userData.UserName, &userData.PassWord)
+		err := rows.Scan(&userData.UserName, &userData.PassWord, &userData.Email)
 		if err != nil {
 			fmt.Println("failed to get data from mysql table", err)
 			return userData, err
@@ -112,19 +121,35 @@ func (d *Database) CreateTigerSightingInfoTable(tableName string) error {
 }
 
 func (d *Database) InsertTigerData(tableName string, tigerData data.TigerDetails) error {
-	_, err := d.Db.Exec("INSERT INTO tigerdetails (name, dateOfBirth, lastSeen, lastSeenlatitude, lastSeenlongitude) VALUES (?, ?, ?, ?, ?)", tigerData.Name, tigerData.DateOfBirth, tigerData.LastSeen, tigerData.Latitude, tigerData.Longitude)
+	exists, err := recordExists(d.Db, tableName, "name", tigerData.Name)
 	if err != nil {
-		fmt.Println("failed to insert data", err)
 		return err
+	}
+	if exists {
+		return errors.New("failed to insert data, duplicate")
+	} else {
+		_, err := d.Db.Exec("INSERT INTO tigerdetails (name, dateOfBirth, lastSeen, lastSeenlatitude, lastSeenlongitude) VALUES (?, ?, ?, ?, ?)", tigerData.Name, tigerData.DateOfBirth, tigerData.LastSeen, tigerData.Latitude, tigerData.Longitude)
+		if err != nil {
+			fmt.Println("failed to insert data", err)
+			return err
+		}
 	}
 	return nil
 }
 
 func (d *Database) InsertTigerSightingData(tableName string, tigerSightingData data.TigerSightingDetails) error {
-	_, err := d.Db.Exec("INSERT INTO tigersighting (name, timestamp, latitude, longitude, uploadImage) VALUES (?, ?, ?, ?, ?)", tigerSightingData.Name, tigerSightingData.TimeStamp, tigerSightingData.Latitude, tigerSightingData.Longitude, tigerSightingData.UploadImage)
+	exists, err := recordExists(d.Db, tableName, "name", tigerSightingData.Name)
 	if err != nil {
-		fmt.Println("failed to insert data", err)
 		return err
+	}
+	if exists {
+		return errors.New("failed to insert data, duplicate")
+	} else {
+		_, err = d.Db.Exec("INSERT INTO tigersighting (name, timestamp, latitude, longitude, uploadImage) VALUES (?, ?, ?, ?, ?)", tigerSightingData.Name, tigerSightingData.TimeStamp, tigerSightingData.Latitude, tigerSightingData.Longitude, tigerSightingData.UploadImage)
+		if err != nil {
+			fmt.Println("failed to insert data", err)
+			return err
+		}
 	}
 	return nil
 }
@@ -188,4 +213,14 @@ func (d *Database) GetTigerData(tableName string, tigerName string) (data.TigerD
 		}
 	}
 	return tigerDetails, nil
+}
+
+func recordExists(db *sql.DB, tableName, columnName, value string) (bool, error) {
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE %s = ?", tableName, columnName)
+	var count int
+	err := db.QueryRow(query, value).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

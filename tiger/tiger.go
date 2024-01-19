@@ -33,7 +33,7 @@ func CreateTiger(w http.ResponseWriter, r *http.Request) {
 	err = dB.InsertTigerData(data.TigerInfoTableName, tigerDetails)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "failed to save data to tigerdetails Table", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	json.NewEncoder(w).Encode(http.StatusCreated)
@@ -92,7 +92,7 @@ func CreateTigerSighting(w http.ResponseWriter, r *http.Request) {
 			err = dB.InsertTigerSightingData(data.TigerInfoTableName, tigerSightDetails)
 			if err != nil {
 				fmt.Println(err)
-				http.Error(w, "failed to save data to tigersighting Table", http.StatusInternalServerError)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 		} else {
