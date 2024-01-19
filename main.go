@@ -1,11 +1,11 @@
 package main
 
 import (
+	"Tiger-Kittens/tiger"
+	"Tiger-Kittens/user"
 	"fmt"
 	"log"
 	"net/http"
-	"tigerhall/tiger"
-	"tigerhall/user"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"

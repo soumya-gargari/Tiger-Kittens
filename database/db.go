@@ -1,9 +1,9 @@
 package database
 
 import (
+	"Tiger-Kittens/data"
 	"database/sql"
 	"fmt"
-	"tigerhall/data"
 )
 
 type Database struct {
@@ -63,6 +63,26 @@ func (d *Database) InsertUserData(tableName string, userData data.UserDetails) e
 		return err
 	}
 	return nil
+}
+
+func (d *Database) GetUserData(tableName, userName, passWord string) (data.UserDetails, error) {
+	var userData data.UserDetails
+	query := fmt.Sprintf("SELECT * FROM %s WHERE username='%s' AND password='%s'", tableName, userName, passWord)
+	fmt.Println("query statement for insertion is:", query)
+	rows, err := d.Db.Query(query)
+	if err != nil {
+		fmt.Println("failed to get data from mysql table", err)
+		return userData, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&userData.UserName, &userData.PassWord)
+		if err != nil {
+			fmt.Println("failed to get data from mysql table", err)
+			return userData, err
+		}
+	}
+	return userData, nil
 }
 
 func (d *Database) CreateTigerInfoTable(tableName string) error {

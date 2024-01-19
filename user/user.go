@@ -1,12 +1,12 @@
 package user
 
 import (
+	"Tiger-Kittens/data"
+	"Tiger-Kittens/database"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"tigerhall/data"
-	"tigerhall/database"
 )
 
 // CreateUser method for creating user
@@ -59,17 +59,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing 'password' query parameter", http.StatusBadRequest)
 		return
 	}
-	var dB database.Database
-	err = dB.CreateUserTable(data.UserTableName)
-	if err != nil {
-		http.Error(w, "failed to save data to mysql", http.StatusInternalServerError)
-		return
-	}
-	err = dB.GetUserData(data.UserTableName, userDetails)
+	db := &database.Database{}
+	mySql := db.InitDatabse()
+	db.Db = mySql
+	userDetails, err := db.GetUserData(data.UserTableName, username, password)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "failed to save data to mysql Table", http.StatusInternalServerError)
+		http.Error(w, "failed to login", http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(http.StatusCreated)
+	if userDetails.UserName != username || userDetails.PassWord != password {
+		http.Error(w, "failed to login", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(http.StatusOK)
 }

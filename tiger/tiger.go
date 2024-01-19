@@ -1,14 +1,14 @@
 package tiger
 
 import (
+	"Tiger-Kittens/data"
+	"Tiger-Kittens/database"
+	"Tiger-Kittens/distance"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
-	"tigerhall/data"
-	"tigerhall/database"
-	"tigerhall/distance"
 )
 
 // CreateTiger method for creating tiger
