@@ -24,7 +24,7 @@ func main() {
 	// endpoint for creating tiger sighting
 	r.HandleFunc("/tiger/sighting", tiger.CreateTigerSighting).Methods("POST")
 	// endpoint for getting tiger sighting details
-	r.HandleFunc("/tiger", tiger.GetAllTigerSightingDetails).Methods("GET")
+	r.HandleFunc("/tigers/sighting", tiger.GetAllTigerSightingDetails).Methods("GET")
 	fmt.Println("starting gorilla mux server:......")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

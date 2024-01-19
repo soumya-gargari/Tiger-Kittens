@@ -74,8 +74,6 @@ func CreateTigerSighting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tigerData, err := dB.GetTigerData(data.TigerInfoTableName, tigerSightDetails.Name)
-	fmt.Println("error of getting tiger data", err)
-	fmt.Println("tiger data is,", tigerData)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "failed to get tiger data from tigerdetails Table", http.StatusInternalServerError)

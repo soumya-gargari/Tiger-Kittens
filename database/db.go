@@ -186,7 +186,7 @@ func (d *Database) GetAllTigerSightingData(tableName string) ([]data.TigerSighti
 	defer rows.Close()
 	for rows.Next() {
 		var tigerSightDetails data.TigerSightingDetails
-		err := rows.Scan(&tigerSightDetails.TimeStamp, &tigerSightDetails.Latitude, &tigerSightDetails.Longitude, &tigerSightDetails.UploadImage)
+		err := rows.Scan(&tigerSightDetails.Name, &tigerSightDetails.Latitude, &tigerSightDetails.Longitude, &tigerSightDetails.TimeStamp, &tigerSightDetails.UploadImage)
 		if err != nil {
 			fmt.Println("failed to get data from mysql table", err)
 			return nil, err
